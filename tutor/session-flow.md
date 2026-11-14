@@ -47,7 +47,7 @@
 
 - 모듈이 끝날 때, 페이스 판단이 바뀔 때, 세션을 마칠 때 `state.json`을 **그 차례 안에** 고친다. 나중으로 미루지 않는다.
 - 오답이나 힌트 의존이 나오면 그 차례에 `gaps`에 적고 페이스 표에 따라 `pace`를 고친다. 예측이 일부만 틀린 경우도 오답이다.
-- 모듈을 시작하면 `current.module`과 `current.path`를 적고 `current.beats`를 0, `current.domestic_done`·`current.global_done`을 `false`로 둔다. 그 모듈의 비트마다 `beats`를 1 올리고, 국내 근거를 사례 조건으로 넣어 학습자가 판단한 차례에 `domestic_done`, 학습자가 글로벌 비교를 한 차례에 `global_done`을 `true`로 한다. 비트를 마칠 때 이번 차례가 그 경로의 첫 답이면 HTML 쓰기를 했는지 확인한다. 튜터 차례가 질문으로 끝나면(모듈 탐침, 입구 진단 문제, 초안 칸 질문 모두) 그 차례의 마지막 `state.json` 수정에 `current.pending_probe`(그 질문)를 함께 쓰고, 답을 받으면 `null`로 되돌린다. `state.json`이 맞는지는 Read로 확인하고, 셸 명령(python·node·jq)으로 검증하지 않는다. 미뤄 둔 판단 질문은 `current.deferred_question`에 따로 둔다(근거 규칙).
+- 모듈을 시작하면 `current.module`과 `current.path`를 적고 `current.beats`를 0, `current.domestic_done`·`current.global_done`을 `false`로 둔다. 그 모듈의 비트마다 `beats`를 1 올리고, 국내 근거를 사례 조건으로 넣어 학습자가 판단한 차례에 `domestic_done`, 학습자가 글로벌 비교를 한 차례에 `global_done`을 `true`로 한다. 비트를 마칠 때 이번 차례가 그 경로의 첫 답이면 HTML 쓰기를 했는지 확인한다. 튜터 차례가 질문으로 끝나면(모듈 탐침, 입구 진단 문제, 초안 칸 질문 모두) 그 차례의 마지막 `state.json` 수정에 `current.pending_probe`(그 질문)를 함께 쓰고, 답을 받으면 `null`로 되돌린다. `state.json`이 맞는지는 Read로 확인하고, 셸 명령(python·node·jq)으로 검증하지 않는다. 미뤄 둔 판단 질문과, 진단 중이라 답을 미룬 학습자의 질문(「RTO 건은 왜 틀린 거예요?」)은 `current.deferred_question`에 따로 둔다. 학습자 질문은 진단이 끝나고 고른 모듈의 첫 세 차례 안에(늦어도 그 모듈을 마치기 전에) 꺼낸다.
 - 기록 중이라는 말을 학습자에게 하지 않는다.
 - 진도를 물으면 `state.json`을 근거로 답한다. 기억으로 답하지 않는다.
 - 세션 중 공식 출처로 확인한 근거는 그 차례에 `sources_checked`에 더한다(근거 규칙).
