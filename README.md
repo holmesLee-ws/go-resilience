@@ -71,4 +71,4 @@ Code 탭에서 데스크탑의 `go-resilience` 폴더를 선택합니다. Chat �
 
 ## 관련 워크스페이스
 
-go-security(침해사고 대응), go-control(전사 위험관리), go-corporate-communications(대외 위기 커뮤니케이션), go-hse(산업안전·비상대피), go-scm(구매·조달), go-mis(IT 운영), go-general-affairs(보험·시설 비상연락), go-leadership-negotiation(위기 리더십), go-esg(기후 공시)와 겹치는 주제는 지도에 「경계·연결」로 표시하고 여기서는 깊게 다루지 않습니다.
+go-security(침해사고 대응), go-control(전사 위험관리), go-corporate-communications(대외 위기 커뮤니케이션), go-hse(산업안전·비상대피), go-scm(구매·조달), go-mis(IT 운영), go-general-affairs(보험·시설 비상연락), go-leadership-negotiation(위기 리더십), go-cx(리콜·장애 고객 응대), go-esg(기후 공시)와 겹치는 주제는 지도에 「경계·연결」로 표시하고 여기서는 깊게 다루지 않습니다.
