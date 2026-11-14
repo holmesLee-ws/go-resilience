@@ -35,7 +35,8 @@ function parseSources(text) {
     if (!target) problems.push(`${id}: 적용 대상 없음`);
     const urls = url.match(/https:\/\/[^\s)>]+/g) || [];
     if (!urls.length) problems.push(`${id}: 공식 URL 없음`);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked)) problems.push(`${id}: 조회일 형식 오류`);
+    const d = new Date(`${checked}T00:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked) || isNaN(d) || d.toISOString().slice(0, 10) !== checked || d > new Date()) problems.push(`${id}: 조회일 형식 오류 또는 미래 날짜`);
     if (!STATUSES.includes(status)) problems.push(`${id}: 확인 상태 값 오류 ${status}`);
     if (!["", "잦음"].includes(change)) problems.push(`${id}: 변동 칸은 빈칸 또는 잦음`);
     sources.set(id, { status, kind });
@@ -49,7 +50,8 @@ const boundarySeen = new Set();
 // spec.md 경계표의 영역(R13): 모두 map.md 「경계·연결」에 1회 이상 나와야 한다.
 const BOUNDARY_AREAS = ["go-security", "go-control", "go-corporate-communications", "go-hse", "go-scm", "go-mis", "go-general-affairs", "go-leadership-negotiation", "go-cx", "go-esg"];
 // spec.md R12의 졸업 산출물 최소 항목 핵심어.
-const X_KEYWORDS = ["적용 의무", "시간별 영향", "최대 허용 중단 기간", "RTO", "RPO", "최소 운영 수준", "단일 장애점", "중단 시나리오", "연속성 전략", "활성화 기준", "통지 경로", "IT 복구", "훈련", "대응표", "출처"];
+const X_KEYWORDS = ["범위", "적용 의무", "핵심 업무", "시간별 영향", "최대 허용 중단 기간", "RTO", "RPO", "최소 운영 수준", "영향 근거", "의존 자원", "공급자", "단일 장애점", "중단 시나리오", "연속성 전략", "선택 근거", "활성화 기준", "대응 조직", "통지 경로", "IT 복구", "훈련", "유지", "대응표", "출처"];
+
 function parseCurriculum(text) {
   const modules = new Map();
   const problems = [];
@@ -61,9 +63,13 @@ function parseCurriculum(text) {
     const id = m[1];
     if (modules.has(id)) problems.push(`${id}: 중복 id`);
     const fields = {};
-    for (const line of block.split("\n").slice(1)) {
+    const body = block.split(/\n## /)[0].split("\n").slice(1);
+    for (const line of body) {
+      if (!line.trim()) continue;
       const f = line.match(/^- ([^:]+): (.+)$/);
-      if (f) fields[f[1]] = f[2];
+      if (!f) { problems.push(`${id}: 모듈 블록에 칸이 아닌 본문 줄(강의 내용 금지): ${line.slice(0, 30)}`); continue; }
+      if (![...FIELDS, "경계·연결", "산출물 필수 항목"].includes(f[1])) problems.push(`${id}: 허용되지 않은 칸 「${f[1]}」`);
+      fields[f[1]] = f[2];
     }
     for (const name of FIELDS) if (!fields[name]) problems.push(`${id}: 「${name}」 없음`);
     for (const [name, prefix] of [["국내 근거", "KR-"], ["글로벌 비교", "GL-"]]) {
@@ -71,14 +77,14 @@ function parseCurriculum(text) {
       if (!ids.some((x) => x.startsWith(prefix))) problems.push(`${id}: 「${name}」에 ${prefix} 출처 없음`);
       refs.push(...ids.map((x) => [id, x]));
     }
-    if (fields["경계·연결"] && !GO_AREAS.some((a) => fields["경계·연결"].includes(a))) problems.push(`${id}: 경계·연결에 go-* 영역 이름 없음`);
+    if (fields["경계·연결"] && !GO_AREAS.some((a) => new RegExp(`(^|[^\\w-])${a}(?![\\w-])`).test(fields["경계·연결"]))) problems.push(`${id}: 경계·연결에 go-* 영역 이름 없음`);
     if (id.startsWith("X")) {
       const must = fields["산출물 필수 항목"] || "";
       if (!must) problems.push(`${id}: 「산출물 필수 항목」 없음`);
       for (const k of X_KEYWORDS) if (must && !must.includes(k)) problems.push(`${id}: 산출물 필수 항목에 「${k}」 없음`);
     }
     domestic.set(id, (fields["국내 근거"] || "").split(",").map((x) => x.trim()).filter(Boolean));
-    if (fields["경계·연결"]) for (const a of BOUNDARY_AREAS) if (fields["경계·연결"].includes(a)) boundarySeen.add(a);
+    if (fields["경계·연결"]) for (const a of BOUNDARY_AREAS) if (new RegExp(`(^|[^\\w-])${a}(?![\\w-])`).test(fields["경계·연결"])) boundarySeen.add(a);
     if (fields["목표"] && !LEVELS.some((l) => fields["목표"].startsWith(`${l} — `))) problems.push(`${id}: 목표 수준 형식 오류`);
     const prereq = !fields["선수"] || fields["선수"] === "없음" ? [] : fields["선수"].split(",").map((s) => s.trim());
     modules.set(id, prereq);
@@ -97,14 +103,11 @@ function parseCurriculum(text) {
 }
 
 function findVisualAssets(files) {
-  const allowedJs = /^tools\/.*\.m?js$/;
-  return files.filter((f) => /\.(html?|css|svg|png|jpe?g|gif|webp|avif)$/i.test(f) || (/\.m?js$/i.test(f) && !allowedJs.test(f)));
+  return files.filter((f) => /\.(x?html?|css|scss|svg|png|jpe?g|gif|webp|avif|ico|bmp|tiff?|woff2?|ttf|otf|eot|canvas)$/i.test(f) || (/\.(m?js|cjs|jsx|tsx?)$/i.test(f) && f !== "tools/check.mjs"));
 }
 
 function findTemplateMarkup(name, text) {
-  const hits = [];
-  for (const m of text.matchAll(/(```|~~~)[\s\S]*?\1/g)) if (/<(!doctype|html|svg|style|canvas|script)\b/i.test(m[0])) hits.push(name);
-  return hits;
+  return /<(!doctype|html|svg|style|canvas|script|body|head)\b/i.test(text) ? [name] : [];
 }
 
 function main() {
@@ -117,7 +120,11 @@ function main() {
     if (!sources.has(ref)) errors.push(`${mod}: 없는 출처 ${ref}`);
     else if (sources.get(ref).status === "미확인") errors.push(`${mod}: 미확인 출처 참조 ${ref}`);
   }
-  if (/제\s?\d+\s?조/.test(mapText)) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
+  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)\s?\d+|§\s?\d+/.test(mapText)) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
+  for (const m of mapText.matchAll(/\b(KR|GL)-[A-Z0-9]+(?:-[A-Z0-9]+)*/g)) {
+    if (!sources.has(m[0])) errors.push(`map.md: 없는 출처 ${m[0]}`);
+    else if (sources.get(m[0]).status === "미확인") errors.push(`map.md: 미확인 출처 ${m[0]}`);
+  }
   const nonX = [...domestic.keys()].filter((m) => !m.startsWith("X"));
   const noStat = nonX.filter((m) => !domestic.get(m).some((r) => STATUTORY.includes(sources.get(r)?.kind)));
   if (nonX.length && noStat.length / nonX.length > 0.25) errors.push(`국내 법령 근거 없는 모듈 ${noStat.length}/${nonX.length} > 25%: ${noStat.join(", ")}`);
@@ -128,12 +135,24 @@ function main() {
 
   const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean);
   for (const f of findVisualAssets(files)) errors.push(`미리 만든 시각 자료 금지: ${f}`);
-  for (const f of files.filter((x) => x.endsWith(".md") && existsSync(join(root, x)))) for (const n of findTemplateMarkup(f, read(f))) errors.push(`복사용 마크업 금지: ${n}`);
+  for (const f of files.filter((x) => x.endsWith(".md") && !x.startsWith("docs/build/") && existsSync(join(root, x)))) for (const n of findTemplateMarkup(f, read(f))) errors.push(`복사용 마크업 금지: ${n}`);
 
   for (const p of [".claude/settings.json", "learner-template/state.json"]) {
     try { JSON.parse(read(p)); } catch (e) { errors.push(`${p}: JSON 오류 ${e.constructor.name}`); }
   }
   if (!existsSync(join(root, "learner-template/log.md"))) errors.push("learner-template/log.md 없음");
+  try {
+    const st = JSON.parse(read("learner-template/state.json"));
+    const need = [["current", "module"], ["current", "path"], ["current", "pending_probe"], ["modules"], ["gaps"], ["pace", "read"], ["pace", "evidence"], ["pace", "action"], ["pace", "at"], ["pace", "history"], ["preferences"], ["sources_checked"], ["notices", "no_real_data"]];
+    for (const k of need) { let o = st; for (const x of k) o = o?.[x]; if (o === undefined) errors.push(`state.json 양식에 ${k.join(".")} 없음`); }
+  } catch {}
+  try {
+    const perm = JSON.parse(read(".claude/settings.json")).permissions || {};
+    const needAllow = ["Edit(/learner/state.json)", "Edit(/learner/log.md)", "Edit(/learner/studio/**/*.html)", "Edit(/learner/work/**/*.md)", "WebSearch", "WebFetch", "Bash(open learner/studio/*.html)", "Bash(xdg-open learner/studio/*.html)", "Bash(start \"\" learner/studio/*.html)", "PowerShell(Start-Process learner/studio/*.html)"];
+    for (const a of needAllow) if (!(perm.allow || []).includes(a)) errors.push(`settings.json allow에 ${a} 없음`);
+    for (const a of perm.allow || []) if (!needAllow.includes(a)) errors.push(`settings.json allow에 목록 밖 항목 ${a}`);
+    for (const d of ["Bash(open *..*)", "Bash(xdg-open *..*)", "Bash(start *..*)", "PowerShell(Start-Process *..*)"]) if (!(perm.deny || []).includes(d)) errors.push(`settings.json deny에 ${d} 없음`);
+  } catch {}
   for (const s of readdirSync(join(root, ".claude/skills"))) {
     if (statSync(join(root, ".claude/skills", s)).isDirectory() && !existsSync(join(root, ".claude/skills", s, "SKILL.md"))) errors.push(`스킬 ${s}: SKILL.md 없음`);
   }

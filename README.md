@@ -26,7 +26,7 @@ claude
 
 **Claude Desktop**
 
-Code 탭에서 데스크탑의 `go-resilience` 폴더를 선택합니다. Chat 탭이 아니라 Code 탭이어야 튜터 규칙이 적용됩니다.
+Code 탭에서 데스크탑의 `go-resilience` 폴더를 선택합니다. Chat 탭이 아니라 Code 탭이어야 튜터 규칙이 적용됩니다. 처음 열 때 폴더 신뢰나 권한 확인이 뜨면 허용해 주세요. Windows에서 바탕화면이 OneDrive로 옮겨져 있으면 `OneDrive\Desktop` 아래에서 찾습니다.
 
 어느 쪽이든 「안녕」이라고 입력하면 시작합니다. 「RTO가 뭐예요?」, 「우리 회사 BCP 만들어야 하는데 어디서부터 해요?」처럼 바로 궁금한 것을 말해도 됩니다.
 

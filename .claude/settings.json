@@ -5,7 +5,7 @@
       "Edit(/learner/state.json)",
       "Edit(/learner/log.md)",
       "Edit(/learner/studio/**/*.html)",
-      "Edit(/learner/work/**)",
+      "Edit(/learner/work/**/*.md)",
       "WebSearch",
       "WebFetch",
       "Bash(open learner/studio/*.html)",
