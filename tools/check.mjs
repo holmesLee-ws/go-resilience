@@ -36,7 +36,7 @@ function parseSources(text) {
     const urls = url.match(/https:\/\/[^\s)>]+/g) || [];
     if (!urls.length) problems.push(`${id}: 공식 URL 없음`);
     const d = new Date(`${checked}T00:00:00Z`);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked) || isNaN(d) || d.toISOString().slice(0, 10) !== checked || d > new Date()) problems.push(`${id}: 조회일 형식 오류 또는 미래 날짜`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked) || isNaN(d) || d.toISOString().slice(0, 10) !== checked || checked > new Date().toLocaleDateString("sv")) problems.push(`${id}: 조회일 형식 오류 또는 미래 날짜`);
     if (!STATUSES.includes(status)) problems.push(`${id}: 확인 상태 값 오류 ${status}`);
     if (!["", "잦음"].includes(change)) problems.push(`${id}: 변동 칸은 빈칸 또는 잦음`);
     sources.set(id, { status, kind });
@@ -74,7 +74,7 @@ function parseCurriculum(text) {
     for (const name of FIELDS) if (!fields[name]) problems.push(`${id}: 「${name}」 없음`);
     for (const [name, prefix] of [["국내 근거", "KR-"], ["글로벌 비교", "GL-"]]) {
       const ids = (fields[name] || "").split(",").map((x) => x.trim()).filter(Boolean);
-      if (!ids.some((x) => x.startsWith(prefix))) problems.push(`${id}: 「${name}」에 ${prefix} 출처 없음`);
+      if (!ids.length || !ids.every((x) => x.startsWith(prefix))) problems.push(`${id}: 「${name}」은 ${prefix} 출처만 쓴다`);
       refs.push(...ids.map((x) => [id, x]));
     }
     if (fields["경계·연결"] && !GO_AREAS.some((a) => new RegExp(`(^|[^\\w-])${a}(?![\\w-])`).test(fields["경계·연결"]))) problems.push(`${id}: 경계·연결에 go-* 영역 이름 없음`);
@@ -120,7 +120,8 @@ function main() {
     if (!sources.has(ref)) errors.push(`${mod}: 없는 출처 ${ref}`);
     else if (sources.get(ref).status === "미확인") errors.push(`${mod}: 미확인 출처 참조 ${ref}`);
   }
-  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)\s?\d+|§\s?\d+/.test(mapText)) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
+  for (const sec of mapText.split(/^## /m).slice(1).filter((x) => !x.startsWith("이 지도에 넣지 않은 것"))) for (const line of sec.split(/^### /m)[0].split("\n").slice(1)) if (line.trim()) errors.push(`map.md 영역 머리 아래 본문 줄 금지: ${line.slice(0, 30)}`);
+  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)?\s?\d+|§\s?\d+|(조항|clause)\s*\d+(\.\d+)+|\d+(\.\d+)+\s*(조항|clause)|\bISO(\/IEC)?\s?\d+\s+\d+(\.\d+)+/i.test(mapText)) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
   for (const m of mapText.matchAll(/\b(KR|GL)-[A-Z0-9]+(?:-[A-Z0-9]+)*/g)) {
     if (!sources.has(m[0])) errors.push(`map.md: 없는 출처 ${m[0]}`);
     else if (sources.get(m[0]).status === "미확인") errors.push(`map.md: 미확인 출처 ${m[0]}`);
@@ -130,7 +131,7 @@ function main() {
   if (nonX.length && noStat.length / nonX.length > 0.25) errors.push(`국내 법령 근거 없는 모듈 ${noStat.length}/${nonX.length} > 25%: ${noStat.join(", ")}`);
   for (const a of BOUNDARY_AREAS) if (!boundarySeen.has(a)) errors.push(`경계·연결에 ${a}가 한 번도 없음`);
   const used = new Set(refs.map(([, r]) => r));
-  for (const id of sources.keys()) if (!used.has(id)) errors.push(`sources.md의 ${id}를 어느 모듈도 쓰지 않음`);
+  for (const [id, v] of sources) if (v.status !== "미확인" && !used.has(id)) errors.push(`sources.md의 ${id}를 어느 모듈도 쓰지 않음`);
   if (modules.size === 0) errors.push("모듈을 찾지 못함");
 
   const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean);

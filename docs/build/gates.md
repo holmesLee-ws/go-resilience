@@ -5,6 +5,7 @@
 | 게이트 | 독립 리뷰 점수(라운드별) | 반영한 주요 지적 | 다음 게이트로 넘긴 맥락 |
 |---|---|---|---|
 | G0 요구·플랫폼 고정 | 7 → 8 | 재해복구 경계(go-mis·go-security) 구체화와 디스패처 확인 요청. sources.md 「구분·적용 대상」 칸, 적용 대상 판정 오류 0(양방향), 국내 법령 근거 없는 모듈 25% 상한. 실무 관리자 대본 5개와 차례 창, 기대 정답은 G1에서 출처 id로 고정. ISO 22301 조항 대응표(8.1 포함)와 BCM 프로그램 수립 주제. 졸업 산출물 최소 항목과 판정 기준. 보험·시설 비상연락은 go-general-affairs, 리콜·장애 고객 응대는 go-cx. 게이트 보고 형식 | 영역 기호 B·A·S·C·T·X. 경계: 침해 대응·백업 보안 go-security, 전사 위험관리 go-control, 대외 메시지 go-corporate-communications, 비상대피 go-hse, 조달 go-scm, IT 운영·DR 운영 위탁 go-mis, 보험·시설 go-general-affairs, 대인 리더십 go-leadership-negotiation, 고객 응대 go-cx, 기후 공시 go-esg. law.go.kr 점검(11-14 21:00까지) 중이라 국회법률정보시스템으로 확인하고 고정 주소는 law.go.kr로 둔다 |
+| G1 학습 설계 | 설계 6 → 8. 근거 독립 대조: 국내 24행 전수(불일치 6·확인 불가 6) · 글로벌 21행 전수(불일치 3·확인 불가 9) → 정정 뒤 변경 14항목 재대조 불일치 0 | 선수 관계(B3←B2, A2←A3, S2←C1, X1←S4·T3), 일반 민간 근거 병기(KR-DRA·KR-ISMSP·KR-NETACT), 적용 대상 양방향·계약 요구 규칙, 업무 정상 복귀·위기 종료, 22301 조항 대응표, 관리자 대본 ②⑤ 정답 고정. 근거 정정: 전자금융감독규정 이후 개정 고시(제2026-29호), 부칙 시행일 산정, 정보통신기반 보호법 제14조 신설 범위, 안정성 고시 조 번호, ISO 31000 DIS 단계, ISO 22313 AWI 단계, Ready.gov BIA 정의 | sources 45행(국내 24, 글로벌 21). law.go.kr 점검 중이라 법령은 국회법률정보시스템 원문으로, ISO는 ISO Open Data, EU는 Publications Office 원문으로 확인. 튜터 조회 대체 경로(likms 검색 GET·본문 URL)를 WebFetch로 실측해 규칙과 sources에 넣음 |
 
 ## G1 ISO 22301 조항 대응(모듈 단위)
 
