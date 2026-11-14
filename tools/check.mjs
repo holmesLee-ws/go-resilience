@@ -36,7 +36,7 @@ function parseSources(text) {
     const urls = url.match(/https:\/\/[^\s)>]+/g) || [];
     if (!urls.length) problems.push(`${id}: 공식 URL 없음`);
     const d = new Date(`${checked}T00:00:00Z`);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked) || isNaN(d) || d.toISOString().slice(0, 10) !== checked || checked > new Date().toLocaleDateString("sv")) problems.push(`${id}: 조회일 형식 오류 또는 미래 날짜`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checked) || isNaN(d) || d.toISOString().slice(0, 10) !== checked || checked > (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`; })()) problems.push(`${id}: 조회일 형식 오류 또는 미래 날짜`);
     if (!STATUSES.includes(status)) problems.push(`${id}: 확인 상태 값 오류 ${status}`);
     if (!["", "잦음"].includes(change)) problems.push(`${id}: 변동 칸은 빈칸 또는 잦음`);
     sources.set(id, { status, kind });
@@ -69,6 +69,7 @@ function parseCurriculum(text) {
       const f = line.match(/^- ([^:]+): (.+)$/);
       if (!f) { problems.push(`${id}: 모듈 블록에 칸이 아닌 본문 줄(강의 내용 금지): ${line.slice(0, 30)}`); continue; }
       if (![...FIELDS, "경계·연결", "산출물 필수 항목"].includes(f[1])) problems.push(`${id}: 허용되지 않은 칸 「${f[1]}」`);
+      if (fields[f[1]] !== undefined) problems.push(`${id}: 중복 칸 「${f[1]}」`);
       fields[f[1]] = f[2];
     }
     for (const name of FIELDS) if (!fields[name]) problems.push(`${id}: 「${name}」 없음`);
@@ -120,8 +121,10 @@ function main() {
     if (!sources.has(ref)) errors.push(`${mod}: 없는 출처 ${ref}`);
     else if (sources.get(ref).status === "미확인") errors.push(`${mod}: 미확인 출처 참조 ${ref}`);
   }
+  const excl = mapText.split(/^## /m).find((x) => x.startsWith("이 지도에 넣지 않은 것")) || "";
+  if (excl.split("\n").slice(1).filter((l) => l.trim()).length > 1) errors.push("map.md 「이 지도에 넣지 않은 것」은 한 문단만");
   for (const sec of mapText.split(/^## /m).slice(1).filter((x) => !x.startsWith("이 지도에 넣지 않은 것"))) for (const line of sec.split(/^### /m)[0].split("\n").slice(1)) if (line.trim()) errors.push(`map.md 영역 머리 아래 본문 줄 금지: ${line.slice(0, 30)}`);
-  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)?\s?\d+|§\s?\d+|(조항|clause)\s*\d+(\.\d+)+|\d+(\.\d+)+\s*(조항|clause)|\bISO(\/IEC)?\s?\d+\s+\d+(\.\d+)+/i.test(mapText)) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
+  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)?\s?\d+|§\s?\d+|\d+\s?조(?!직|건|정|사|치|성|합|언|율|달|기)|\bclause\s*\d+|\b\d+\.\d+(\.\d+)*(?!\d)|\bISO\S*\s?\d+\S*\s+\d+(\.\d+)*/i.test(mapText.replace(/\b(KR|GL)-[A-Z0-9-]+/g, "").replace(/\d{4}-\d{2}-\d{2}/g, ""))) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
   for (const m of mapText.matchAll(/\b(KR|GL)-[A-Z0-9]+(?:-[A-Z0-9]+)*/g)) {
     if (!sources.has(m[0])) errors.push(`map.md: 없는 출처 ${m[0]}`);
     else if (sources.get(m[0]).status === "미확인") errors.push(`map.md: 미확인 출처 ${m[0]}`);
