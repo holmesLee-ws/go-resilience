@@ -12,7 +12,10 @@
     "module": null,
     "path": null,
     "pending_probe": null,
-    "deferred_question": null
+    "deferred_question": null,
+    "beats": 0,
+    "domestic_done": false,
+    "global_done": false
   },
   "modules": {},
   "gaps": [],

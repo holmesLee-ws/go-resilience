@@ -147,7 +147,7 @@ function main() {
   if (!existsSync(join(root, "learner-template/log.md"))) errors.push("learner-template/log.md 없음");
   try {
     const st = JSON.parse(read("learner-template/state.json"));
-    const need = [["current", "module"], ["current", "path"], ["current", "pending_probe"], ["current", "deferred_question"], ["modules"], ["gaps"], ["pace", "read"], ["pace", "evidence"], ["pace", "action"], ["pace", "at"], ["pace", "history"], ["preferences"], ["sources_checked"], ["notices", "no_real_data"]];
+    const need = [["current", "module"], ["current", "path"], ["current", "pending_probe"], ["current", "deferred_question"], ["current", "beats"], ["current", "domestic_done"], ["current", "global_done"], ["modules"], ["gaps"], ["pace", "read"], ["pace", "evidence"], ["pace", "action"], ["pace", "at"], ["pace", "history"], ["preferences"], ["sources_checked"], ["notices", "no_real_data"]];
     for (const k of need) { let o = st; for (const x of k) o = o?.[x]; if (o === undefined) errors.push(`state.json 양식에 ${k.join(".")} 없음`); }
   } catch {}
   try {
