@@ -11,7 +11,8 @@
   "current": {
     "module": null,
     "path": null,
-    "pending_probe": null
+    "pending_probe": null,
+    "deferred_question": null
   },
   "modules": {},
   "gaps": [],

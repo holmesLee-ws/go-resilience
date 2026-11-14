@@ -124,7 +124,7 @@ function main() {
   const excl = mapText.split(/^## /m).find((x) => x.startsWith("이 지도에 넣지 않은 것")) || "";
   if (excl.split("\n").slice(1).filter((l) => l.trim()).length > 1) errors.push("map.md 「이 지도에 넣지 않은 것」은 한 문단만");
   for (const sec of mapText.split(/^## /m).slice(1).filter((x) => !x.startsWith("이 지도에 넣지 않은 것"))) for (const line of sec.split(/^### /m)[0].split("\n").slice(1)) if (line.trim()) errors.push(`map.md 영역 머리 아래 본문 줄 금지: ${line.slice(0, 30)}`);
-  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)?\s?\d+|§\s?\d+|\d+\s?조(?!직|건|정|사|치|성|합|언|율|달|기)|\bclause\s*\d+|\b\d+\.\d+(\.\d+)*(?!\d)|\bISO\S*\s?\d+\S*\s+\d+(\.\d+)*/i.test(mapText.replace(/\b(KR|GL)-[A-Z0-9-]+/g, "").replace(/\d{4}-\d{2}-\d{2}/g, ""))) errors.push("map.md에 조문 번호 금지(sources.md에만 둔다)");
+  if (/제\s?\d+\s?조|\d+\s?조의\s?\d+|\bArt(icle|\.)?\s?\d+|§\s?\d+|\d+\s?조(?!직|건|정|사|치|성|합|언|율|달|기|\s?원|\s?\d*\s?교대|로)|제?\s?\d+\s?(항|호)(?![가-힣])|별표\s?\d|\bSec(tion|\.)\s?\d|\bAnnex\s+[IVX\d]|\bPrinciple\s+\d|\bclause\s*\d+|\b\d+\.\d+(\.\d+)*(?!\d)|\bISO\S*\s?\d+\S*\s+\d+(\.\d+)*/i.test(mapText.replace(/\b(KR|GL)-[A-Z0-9-]+/g, "").replace(/\d{4}-\d{2}-\d{2}/g, ""))) errors.push("map.md에 조문·조항 번호 같은 숫자 금지(sources.md에만 둔다)");
   for (const m of mapText.matchAll(/\b(KR|GL)-[A-Z0-9]+(?:-[A-Z0-9]+)*/g)) {
     if (!sources.has(m[0])) errors.push(`map.md: 없는 출처 ${m[0]}`);
     else if (sources.get(m[0]).status === "미확인") errors.push(`map.md: 미확인 출처 ${m[0]}`);
@@ -147,7 +147,7 @@ function main() {
   if (!existsSync(join(root, "learner-template/log.md"))) errors.push("learner-template/log.md 없음");
   try {
     const st = JSON.parse(read("learner-template/state.json"));
-    const need = [["current", "module"], ["current", "path"], ["current", "pending_probe"], ["modules"], ["gaps"], ["pace", "read"], ["pace", "evidence"], ["pace", "action"], ["pace", "at"], ["pace", "history"], ["preferences"], ["sources_checked"], ["notices", "no_real_data"]];
+    const need = [["current", "module"], ["current", "path"], ["current", "pending_probe"], ["current", "deferred_question"], ["modules"], ["gaps"], ["pace", "read"], ["pace", "evidence"], ["pace", "action"], ["pace", "at"], ["pace", "history"], ["preferences"], ["sources_checked"], ["notices", "no_real_data"]];
     for (const k of need) { let o = st; for (const x of k) o = o?.[x]; if (o === undefined) errors.push(`state.json 양식에 ${k.join(".")} 없음`); }
   } catch {}
   try {

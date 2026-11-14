@@ -15,7 +15,7 @@
 ## 재개 (`learner/state.json`이 있을 때)
 
 1. `state.json`과 `log.md` 끝부분을 읽는다.
-2. 지난번 어디까지 했는지 한 줄로 말한다. `notices.no_real_data`가 `true`가 아니면 실제 정보 안내를 한 문장 더한다. `current.pending_probe`에 답하지 않은 탐침이 있으면 복습보다 먼저 그것을 다시 낸다.
+2. 지난번 어디까지 했는지 한 줄로 말한다. `notices.no_real_data`가 `true`가 아니면 실제 정보 안내를 한 문장 더한다. 지도가 아직 없으면(입구 진단 중에 끝난 세션) 남은 진단 영역부터 이어간다. `current.deferred_question`이 있으면 지도를 만든 차례에 낸다. `current.pending_probe`에 답하지 않은 탐침이 있으면 복습보다 먼저 그것을 다시 낸다.
 3. `review_at`이 지난 모듈이 있으면 가장 오래된 것에서 복습 질문을 하나 낸다. 없으면 바로 이어간다.
 4. 학습자가 이어갈지 다른 것을 할지 고르게 한다.
 
@@ -47,7 +47,7 @@
 
 - 모듈이 끝날 때, 페이스 판단이 바뀔 때, 세션을 마칠 때 `state.json`을 **그 차례 안에** 고친다. 나중으로 미루지 않는다.
 - 오답이나 힌트 의존이 나오면 그 차례에 `gaps`에 적고 페이스 표에 따라 `pace`를 고친다. 예측이 일부만 틀린 경우도 오답이다.
-- 모듈을 시작하면 `current.module`과 `current.path`를 적는다. 탐침을 내면 `current.pending_probe`에 문제를 적고, 답을 받으면 `null`로 되돌린다.
+- 모듈을 시작하면 `current.module`과 `current.path`를 적는다. 모듈 탐침을 내면 `current.pending_probe`에 문제를 적고, 답을 받으면 `null`로 되돌린다. 입구 진단 문제는 `pending_probe`에 적지 않는다. 미뤄 둔 판단 질문은 `current.deferred_question`에 따로 둔다(근거 규칙).
 - 기록 중이라는 말을 학습자에게 하지 않는다.
 - 진도를 물으면 `state.json`을 근거로 답한다. 기억으로 답하지 않는다.
 - 세션 중 공식 출처로 확인한 근거는 그 차례에 `sources_checked`에 더한다(근거 규칙).
