@@ -108,7 +108,7 @@
 - 만들어 볼 것: 시스템 세 개의 복구 방식 비교표
 - 국내 근거: KR-EFSR, KR-ISMSP, KR-NETACT, KR-NIRS-DR, KR-ISSTAB
 - 글로벌 비교: GL-80034, GL-27031, GL-DORA
-- 경계·연결: IT 운영 절차와 재해복구 운영 위탁 관리는 go-mis, 백업의 보안 통제는 go-security
+- 경계·연결: 백업·복제·재해복구 사이트 구성과 IT 복구 절차의 구현은 go-mis(O5 연속성과 재해 복구), IT 운영 절차와 재해복구 운영 위탁 관리도 go-mis, 백업의 보안 통제는 go-security
 
 ### S4 · 복구 절차와 정상 복귀
 - 선수: S3
